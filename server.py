@@ -1,4 +1,9 @@
-# 1. Use `pip install Flask` to install the required libraries/modules.
+
+# 0. Create Virtual Env to avoid conflicts using commands below
+# `python -m venv DIP`
+# `source DIP/bin/activate`
+
+# 1. Use `pip install -r "requirements.txt` to install the required libraries/modules.
 # 2. Run the server using `python server.py`.
 
 from flask import Flask, request, jsonify

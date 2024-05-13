@@ -1,0 +1,10 @@
+pandas
+numpy
+matplotlib
+seaborn
+tensorflow
+cv2
+PIL
+IPython
+flask
+flask_cors
