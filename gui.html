@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Server Example with Axios</title>
+</head>
+<body>
+    <h1>Flask Server Example with Axios</h1>
+    <button onclick="makeRequest()">Make Request</button>
+    <p id="response"></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function makeRequest() {
+            const url = 'http://127.0.0.1:5000/dip-req';
+            // Make an HTTP GET request to the Flask server using Axios
+            axios.get(url, {params : {image_URL: "input file url"}}) 
+                .then(response => {
+                    // Update the webpage with the response
+                    const responseData = response.data;
+
+                // Check if the status is 'success'
+                if (responseData.status === 'success') {
+                    // Update the webpage with the written URL
+                    document.getElementById('response').textContent = responseData.written;
+                } else {
+                    // Handle failure case
+                    console.error('Server returned failure status:', responseData.status);
+                    document.getElementById('response').textContent = 'Failure - ' + responseData.status;
+                }
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error('There was a problem with the Axios request:', error);
+                document.getElementById('response').textContent = error;
+            });
+        }
+    </script>
+</body>
+</html>
