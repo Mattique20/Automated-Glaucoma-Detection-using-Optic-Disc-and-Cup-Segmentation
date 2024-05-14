@@ -3,38 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Server Example with Axios</title>
+    <title>Anhi deya software</title>
+    <style>
+        .sidebar {
+            float: left;
+            width: 15%;
+            height: 94vh; /* Set min-height to cover the entire viewport */
+            background-color: #333; /* Dark grayish tone */
+            color: #fff; /* Text color */
+            padding: 20px;
+            margin: -10px; /* No margins */
+            font-family: Arial;
+            font-size: medium;
+        }
+        .sidebar h2,p
+        {
+            margin: 10px;
+        }
+        .sidebar button, .sidebar input[type="file"], .sidebar label.file-label {
+             /* Add margin between buttons and file input */
+            border: 2px solid #fff; /* White border */
+            border-radius: 20px; /* Rounded corners */
+            background-color: transparent; /* Transparent background */
+            color: #fff; /* White text */
+            padding: 10px 20px; /* Padding */
+            cursor: pointer;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Minor shadow */
+            transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+        }
+        
+        .sidebar button:hover, .sidebar input[type="file"]:hover, .sidebar label.file-label:hover {
+            background-color: #fff; /* White background on hover */
+            color: #000; /* Black text on hover */
+        }
+
+        .response-container {
+            float: right;
+            width: 85%; /* Adjusted width */
+            height: 100vh; /* Set min-height to cover the entire viewport */
+            padding: 0px;
+            margin-top: -500px;
+            margin: -10px; /* No margins */
+            background-color: #676565; /* Greyish tone */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .response-container img {
+            max-width: 100%;
+            max-height: 100%;
+            opacity: 0;
+            animation: fadeIn 2s forwards, popUp 1s forwards;
+        }
+        .response-container .logo-img {
+            max-width: 100%;
+            max-height: 100%;
+            opacity: 50%;
+            animation: entrance 5s forwards;
+        }
+        /* Animation keyframes */
+        @keyframes entrance {
+            0% {
+                opacity: 0;
+                transform: translateY(-150px);
+            }
+            100% {
+                opacity: 0.75;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes popUp {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        /* Hide the default appearance of the file input */
+        .sidebar input[type="file"] {
+            display: none;
+            
+        }
+        .sidebar button{
+            margin-bottom: 20px;
+        }
+
+        /* Logo animation */
+        .logo-img {
+            max-width: 10%;
+            max-height: 10%;
+            animation: entrance 5s forwards;
+        }
+    </style>
 </head>
 <body>
-    <h1>Flask Server Example with Axios</h1>
-    <button onclick="makeRequest()">Make Request</button>
-    <p id="response"></p>
+    <div class="sidebar">
+        <h2>About Glaucoma Detection Software</h2>
+        <p>This software utilizes advanced image processing techniques to detect signs of glaucoma in retinal images.</p>
+        <p>Upload an image of the retina and click the button below to check for glaucoma.</p>
+        <button id="checkButton" onclick="makeRequest()">Check Glaucoma</button>
+        <label for="imageUpload" class="file-label">Choose File</label>
+        <input type="file" id="imageUpload" accept="image/*">
+    </div>
+
+    <div class="response-container">
+        <!-- Image will be displayed here -->
+        <img src="C:\Users\Mohammad Attique\Desktop\logo-09.png" alt="Logo" class="logo-img">
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+        let imageUrl = null; // Variable to store the image URL
+
+        document.getElementById('imageUpload').addEventListener('change', function(event) {
+            const file = event.target.files[0]; // Get the first file from the input
+            imageUrl = URL.createObjectURL(file); // Create a URL for the file
+        });
+
         function makeRequest() {
             const url = 'http://127.0.0.1:5000/dip-req';
+            
+            // Check if imageUrl is not null
+            if (imageUrl === null) {
+                document.getElementById('response').textContent = 'Please select an image first.';
+                return;
+            }
+
+            // Display the uploaded image
+            const imageContainer = document.querySelector('.response-container');
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = 'Uploaded Image';
+            imageContainer.innerHTML = ''; // Clear previous content
+            imageContainer.appendChild(img);
+
             // Make an HTTP GET request to the Flask server using Axios
-            axios.get(url, {params : {image_URL: "input file url"}}) 
+            axios.get(url, { params: { image_URL: imageUrl } }) 
                 .then(response => {
                     // Update the webpage with the response
                     const responseData = response.data;
 
-                // Check if the status is 'success'
-                if (responseData.status === 'success') {
-                    // Update the webpage with the written URL
-                    document.getElementById('response').textContent = responseData.written;
-                } else {
-                    // Handle failure case
-                    console.error('Server returned failure status:', responseData.status);
-                    document.getElementById('response').textContent = 'Failure - ' + responseData.status;
-                }
-            })
-            .catch(error => {
-                // Handle any errors
-                console.error('There was a problem with the Axios request:', error);
-                document.getElementById('response').textContent = error;
-            });
+                    // Check if the response contains the 'status' field
+                    if ('status' in responseData) {
+                        if (responseData.status === 'success') {
+                            // Update the webpage with the written URL
+                            document.getElementById('response').textContent = responseData.written || 'No written URL provided';
+                        } else {
+                            // Handle failure case
+                            console.error('Server returned failure status:', responseData.status);
+                            document.getElementById('response').textContent = 'Failure - ' + responseData.status;
+                        }
+                    } else {
+                        // Handle unexpected response format
+                        console.error('Unexpected response format:', responseData);
+                        document.getElementById('response').textContent = 'Unexpected response format';
+                    }
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error('There was a problem with the Axios request:', error);
+                    document.getElementById('response').textContent = 'Error - ' + error.message;
+                });
         }
     </script>
 </body>
